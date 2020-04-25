@@ -15,13 +15,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
     private ArrayList<String> target;
-    private ArrayAdapter adapter;
+    private SimpleCursorAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +37,18 @@ public class MainActivity extends AppCompatActivity {
         String[] strings = new String[]{"Karol I Habsburg", " z Bożej Łaski cesarz Austrii", " apostolski król Węgier", " król Czech", " Dalmacji", " Chorwacji", " Slawonii", " Galicji", " Lodomerii i Ilyrii", " król Jerozolimy etc etc. arcyksiążę Austrii", " wielki książę Toskanii i Krakowa", " książę Lotaryngii", " Salzburga", " Styrii", " Karyntii", " Krainy i Bukowiny", " wielki książę Siedmiogrodu", " margrabia Moraw", " książę Dolnego i Górnego Śląska", " Modeny", " Parmy", " Piacenzy", " Guastalli", " Oświęcimia i Zatoru", " Cieszyna", " Friaul", " Raguzy i Zary", " uksiążęcony hrabia Habsburga i Tyrolu", " Kyburga", " Goricy i Kradiski", " książę Trydentu i Brixen", " margrabia Łużyc Dolnych i Górnych oraz Istrii", " hrabia Hohenembs", " Feldkirch", " Bregenz", " Sonnenebergu", " pan Triestu", " Cattaro i Marchii Wendyjskiej", " wielki wojewoda województwa Serbii", " etc.", " etc."};
         this.target = new ArrayList<String>();
         this.target.addAll(Arrays.asList(strings));
-        this.adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, this.target);
+        MySQLite db = new MySQLite(this);
+        this.adapter = new SimpleCursorAdapter(
+                this,
+                android.R.layout.simple_list_item_2,
+                db.lista(),
+                new String[]{"_id", "gatunek"},
+                new int[]{android.R.id.text1,
+                        android.R.id.text2},
+
+                SimpleCursorAdapter.IGNORE_ITEM_VIEW_TYPE
+        );
+
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(this.adapter);
 

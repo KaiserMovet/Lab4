@@ -13,9 +13,11 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity {
     private ArrayList<String> target;
     private SimpleCursorAdapter adapter;
+    private MySQLite db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         String[] strings = new String[]{"Karol I Habsburg", " z Bożej Łaski cesarz Austrii", " apostolski król Węgier", " król Czech", " Dalmacji", " Chorwacji", " Slawonii", " Galicji", " Lodomerii i Ilyrii", " król Jerozolimy etc etc. arcyksiążę Austrii", " wielki książę Toskanii i Krakowa", " książę Lotaryngii", " Salzburga", " Styrii", " Karyntii", " Krainy i Bukowiny", " wielki książę Siedmiogrodu", " margrabia Moraw", " książę Dolnego i Górnego Śląska", " Modeny", " Parmy", " Piacenzy", " Guastalli", " Oświęcimia i Zatoru", " Cieszyna", " Friaul", " Raguzy i Zary", " uksiążęcony hrabia Habsburga i Tyrolu", " Kyburga", " Goricy i Kradiski", " książę Trydentu i Brixen", " margrabia Łużyc Dolnych i Górnych oraz Istrii", " hrabia Hohenembs", " Feldkirch", " Bregenz", " Sonnenebergu", " pan Triestu", " Cattaro i Marchii Wendyjskiej", " wielki wojewoda województwa Serbii", " etc.", " etc."};
         this.target = new ArrayList<String>();
         this.target.addAll(Arrays.asList(strings));
-        MySQLite db = new MySQLite(this);
+        db = new MySQLite(this);
         this.adapter = new SimpleCursorAdapter(
                 this,
                 android.R.layout.simple_list_item_2,
@@ -51,6 +54,19 @@ public class MainActivity extends AppCompatActivity {
 
         ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(this.adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?>
+                                            adapter, View view, int pos, long id) {
+                TextView name = (TextView) view.findViewById(android.R.id.text1);
+                Animal zwierz = db.pobierz(Integer.parseInt(name.getText().toString()));
+                Intent intencja = new Intent(getApplicationContext(), DodajWpis.class);
+                intencja.putExtra("element", zwierz);
+                startActivityForResult(intencja, 2);
+
+
+            }
+        });
 
     }
 
@@ -87,8 +103,16 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(request_code, resultCode, data);
         if (request_code == 1 && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            String nowy = (String) extras.get("wpis");
-            target.add(nowy);
+            Animal nowy = (Animal) extras.getSerializable("nowy");
+            this.db.dodaj(nowy);
+            adapter.changeCursor(db.lista());
+            adapter.notifyDataSetChanged();
+        }
+        if (request_code == 2 && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Animal nowy = (Animal) extras.getSerializable("nowy");
+            this.db.aktualizuj(nowy);
+            adapter.changeCursor(db.lista());
             adapter.notifyDataSetChanged();
         }
     }
